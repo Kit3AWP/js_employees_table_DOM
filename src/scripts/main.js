@@ -58,8 +58,8 @@ function sortTable() {
 
       const rows = [...tBody.querySelectorAll('tr')];
 
-      rows.forEach(() => {
-        row.classList.remove('active');
+      rows.forEach((r) => {
+        r.classList.remove('active');
       });
       row.classList.add('active');
     }
@@ -100,6 +100,30 @@ function createForm() {
   labelPosition.append(inputPosition);
   form.append(labelPosition);
 
+  const labelSelect = document.createElement('label');
+
+  labelSelect.textContent = 'Office: ';
+
+  const inputSelect = document.createElement('select');
+
+  inputSelect.name = 'office';
+  inputSelect.dataset.qa = 'office';
+
+  // eslint-disable-next-line
+  const cities = ['Tokyo', 'Singapore', 'London', 'New York', 'Edinburgh', 'San Francisco'];
+
+  for (const city of cities) {
+    const option = document.createElement('option');
+
+    option.value = city;
+    option.textContent = city;
+
+    inputSelect.append(option);
+  }
+
+  labelSelect.append(inputSelect);
+  form.append(labelSelect);
+
   const labelAge = document.createElement('label');
 
   labelAge.textContent = 'Age: ';
@@ -138,9 +162,130 @@ function createForm() {
   function handleSubmit(e) {
     e.preventDefault();
 
-    // const formData = new FormData(e.target);
-    // const name = formData.get('name');
-    // const position = formData.get('position');
+    const formData = new FormData(e.target);
+    const employeeName = formData.get('name');
+    const position = formData.get('position');
+    const office = formData.get('office');
+    const age = formData.get('age');
+    const salary = formData.get('salary');
+    const numAge = Number(age);
+
+    if (
+      employeeName === '' ||
+      position === '' ||
+      office === '' ||
+      age === '' ||
+      salary === ''
+    ) {
+      showNotification('error', 'all fields must be filled in');
+
+      return;
+    }
+
+    if (employeeName.length < 4) {
+      showNotification('error', 'Name is too short');
+
+      return;
+    }
+
+    if (numAge < 18 || numAge > 90) {
+      showNotification('error', 'Age is too low');
+
+      return;
+    }
+
+    const tr = document.createElement('tr');
+    const nameData = document.createElement('td');
+    const positionData = document.createElement('td');
+    const officeData = document.createElement('td');
+    const ageData = document.createElement('td');
+    const salaryData = document.createElement('td');
+
+    nameData.append(employeeName);
+    positionData.append(position);
+    officeData.append(office);
+    ageData.append(numAge);
+    salaryData.append(`$${Number(salary).toLocaleString('en-US')}`);
+
+    tr.append(nameData);
+    tr.append(positionData);
+    tr.append(officeData);
+    tr.append(ageData);
+    tr.append(salaryData);
+    tBody.append(tr);
+
+    form.reset();
+
+    const rows = [...tBody.querySelectorAll('tr')];
+
+    rows.forEach((r) => {
+      r.classList.remove('active');
+    });
+    showNotification('success', 'Employee added');
   }
 }
 createForm();
+
+function showNotification(type, message) {
+  const notification = document.createElement('div');
+
+  notification.dataset.qa = 'notification';
+  notification.classList.add(type, 'notification');
+
+  const titleElement = document.createElement('div');
+
+  titleElement.textContent = type;
+  titleElement.classList.add('title');
+  notification.append(titleElement);
+
+  const messageElement = document.createElement('div');
+
+  messageElement.textContent = message;
+  notification.append(titleElement, messageElement);
+
+  document.body.append(notification);
+
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
+}
+
+table.addEventListener('dblclick', (e) => {
+  const cell = e.target.closest('td');
+
+  if (!cell) {
+    return;
+  }
+
+  if (cell.querySelector('input')) {
+    return;
+  }
+
+  const oldValue = cell.textContent;
+
+  cell.textContent = '';
+
+  const input = document.createElement('input');
+
+  input.classList.add('cell-input');
+  input.value = oldValue;
+
+  cell.append(input);
+  input.focus();
+
+  function save() {
+    if (input.value === '') {
+      cell.textContent = oldValue;
+    } else {
+      cell.textContent = input.value;
+    }
+  }
+
+  input.addEventListener('blur', save);
+
+  input.addEventListener('keydown', (evt) => {
+    if (evt.key === 'Enter') {
+      save();
+    }
+  });
+});
