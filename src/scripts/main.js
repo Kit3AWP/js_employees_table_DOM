@@ -72,6 +72,7 @@ function createForm() {
   const form = document.createElement('form');
 
   form.classList.add('new-employee-form');
+  form.setAttribute('novalidate', true);
   table.after(form);
 
   const label = document.createElement('label');
@@ -83,6 +84,7 @@ function createForm() {
   input.name = 'name';
   input.type = 'text';
   input.dataset.qa = 'name';
+  input.required = true;
 
   label.append(input);
   form.append(label);
@@ -96,6 +98,7 @@ function createForm() {
   inputPosition.name = 'position';
   inputPosition.type = 'text';
   inputPosition.dataset.qa = 'position';
+  inputPosition.required = true;
 
   labelPosition.append(inputPosition);
   form.append(labelPosition);
@@ -108,6 +111,7 @@ function createForm() {
 
   inputSelect.name = 'office';
   inputSelect.dataset.qa = 'office';
+  inputSelect.required = true;
 
   // eslint-disable-next-line
   const cities = ['Tokyo', 'Singapore', 'London', 'New York', 'Edinburgh', 'San Francisco'];
@@ -133,6 +137,7 @@ function createForm() {
   inputAge.name = 'age';
   inputAge.type = 'number';
   inputAge.dataset.qa = 'age';
+  inputAge.required = true;
 
   labelAge.append(inputAge);
   form.append(labelAge);
@@ -146,6 +151,7 @@ function createForm() {
   inputSalary.name = 'salary';
   inputSalary.type = 'number';
   inputSalary.dataset.qa = 'salary';
+  inputSalary.required = true;
 
   labelSalary.append(inputSalary);
   form.append(labelSalary);
@@ -236,7 +242,6 @@ function showNotification(type, message) {
 
   titleElement.textContent = type;
   titleElement.classList.add('title');
-  notification.append(titleElement);
 
   const messageElement = document.createElement('div');
 
@@ -252,12 +257,19 @@ function showNotification(type, message) {
 
 table.addEventListener('dblclick', (e) => {
   const cell = e.target.closest('td');
+  const existingInput = document.querySelector('.cell-input');
 
-  if (!cell) {
-    return;
+  if (existingInput) {
+    const oldCell = existingInput.closest('td');
+
+    if (oldCell === cell) {
+      return;
+    }
+
+    oldCell.textContent = existingInput.value || oldCell.textContent;
   }
 
-  if (cell.querySelector('input')) {
+  if (!cell) {
     return;
   }
 
